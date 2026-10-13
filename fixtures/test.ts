@@ -4,6 +4,7 @@ import { RegisterPage } from '../pages/RegisterPage';
 import { UserApi } from '../api/UserApi';
 import { createNewUser, NewUser } from '../test-data/users';
 import { BasketPage } from '../pages/BasketPage';
+import { ProductListPage } from '../pages/ProductListPage';
 
 type Fixtures = {
     loginPage: LoginPage;
@@ -11,6 +12,7 @@ type Fixtures = {
     userApi: UserApi;
     loggedInUser: NewUser;
     basketPage: BasketPage;
+    productListPage: ProductListPage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -51,6 +53,10 @@ export const test = base.extend<Fixtures>({
 
     basketPage: async ({ page }, use) => {
         await use(new BasketPage(page));
+    },
+
+    productListPage: async ({ page }, use) => {
+        await use(new ProductListPage(page));
     },
 
 });

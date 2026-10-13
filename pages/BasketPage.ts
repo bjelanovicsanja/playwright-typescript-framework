@@ -12,4 +12,8 @@ export class BasketPage {
         await this.page.goto('/#/basket');
     }
 
+    basketItem(productName: string): Locator {
+        return this.page.getByRole('row').filter({ hasText: productName });
+    }
+
 }

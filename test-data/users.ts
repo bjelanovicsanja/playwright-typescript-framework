@@ -1,6 +1,5 @@
 import { randomUUID } from 'crypto';
 
-
 export const users = {
     admin: {
         email: 'admin@juice-sh.op',
