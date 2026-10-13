@@ -2,11 +2,15 @@ import { test as base, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { UserApi } from '../api/UserApi';
+import { createNewUser, NewUser } from '../test-data/users';
+import { BasketPage } from '../pages/BasketPage';
 
 type Fixtures = {
     loginPage: LoginPage;
     registerPage: RegisterPage;
     userApi: UserApi;
+    loggedInUser: NewUser;
+    basketPage: BasketPage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -28,6 +32,25 @@ export const test = base.extend<Fixtures>({
 
     userApi: async ({ request }, use) => {
         await use(new UserApi(request));
+    },
+
+    loggedInUser: async ({ userApi, page, baseURL }, use) => {
+        const user = createNewUser();
+        await userApi.register(user.email, user.password);
+        const response = await userApi.login(user.email, user.password);
+        const { token, bid } = (await response.json()).authentication;
+
+        await page.context().addCookies([{ name: 'token', value: token, url: baseURL! }]);
+        await page.addInitScript(({ token, bid }) => {
+            localStorage.setItem('token', token);
+            sessionStorage.setItem('bid', String(bid));
+        }, { token, bid });
+
+        await use(user);
+    },
+
+    basketPage: async ({ page }, use) => {
+        await use(new BasketPage(page));
     },
 
 });

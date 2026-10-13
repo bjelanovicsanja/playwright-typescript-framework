@@ -23,6 +23,7 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 | Home page | Page loads without onboarding popups |
 | Login | Valid credentials, invalid credentials |
 | Registration | Valid registration, new user can log in, passwords do not match |
+| Basket | Logged-in user sees their own basket |
 
 ### API
 
@@ -101,13 +102,14 @@ On every push and pull request to `main`, GitHub Actions:
 - **Page objects contain no assertions.** They describe how to interact with a page; tests decide what to verify.
 - **Locators follow Playwright's recommended priority**: role and accessible name first, text next, CSS only as a last resort.
 - **Unique test data.** Each registration test generates a new user with a unique email, so tests are independent and can run in parallel.
+- **Login through the API for UI tests.** The `loggedInUser` fixture creates a user and logs in through the API, then injects the token into the browser. Tests that need a logged-in user start directly on the page they test, without going through the login form.
 - **No fixed waits.** The registration page waits for the security questions API response before interacting with the form, instead of using timeouts.
 
 ## Roadmap
 
 - [x] API tests for users (registration, login, authorization)
 - [ ] API tests for products and basket
-- [ ] Use the API to prepare test data for UI tests
+- [x] Use the API to log in users for UI tests
 - [ ] Authenticated state reuse (`storageState`)
 - [ ] Basket and checkout flows
 - [ ] Nightly scheduled CI run
