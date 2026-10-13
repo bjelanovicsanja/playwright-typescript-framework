@@ -10,10 +10,13 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 
 - **Playwright Test** with **TypeScript**
 - **Page Object Model**, with page objects provided through custom Playwright fixtures
+- **API testing** with Playwright's built-in `request` context
 - **GitHub Actions** CI
 - **Docker** (Juice Shop runs as a container, locally and in CI)
 
 ## What is covered
+
+### UI
 
 | Area | Tests |
 |---|---|
@@ -21,16 +24,23 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 | Login | Valid credentials, invalid credentials |
 | Registration | Valid registration, new user can log in, passwords do not match |
 
+### API
+
+| Area | Tests |
+|---|---|
+| Users | Create a user (201, no password in the response), new user can log in and receives a token, invalid login is rejected (401), user list is protected without authentication (401) |
+
 ## Project structure
 
 ```
 ├── .github/workflows/   # CI pipeline
-├── fixtures/            # Custom fixtures (popup handling, page objects)
+├── api/                 # API clients
+├── fixtures/            # Custom fixtures (popup handling, page objects, API clients)
 ├── pages/               # Page objects
 ├── test-data/           # Static test data and test data generators
 ├── tests/
 │   ├── ui/              # UI tests
-│   └── api/             # API tests (planned)
+│   └── api/             # API tests
 ├── playwright.config.ts
 └── tsconfig.json
 ```
@@ -61,6 +71,8 @@ npx playwright install chromium
 
 ```bash
 npx playwright test              # all tests, headless
+npx playwright test tests/ui     # UI tests only
+npx playwright test tests/api    # API tests only
 npx playwright test --headed     # see the browser
 npx playwright test --ui         # interactive UI mode
 npx playwright show-report       # open the HTML report
@@ -84,7 +96,8 @@ On every push and pull request to `main`, GitHub Actions:
 ## Design decisions
 
 - **Popups are skipped with cookies, not clicks.** A custom fixture sets the `welcomebanner_status` and `cookieconsent_status` cookies before each test, so no test has to dismiss popups through the UI. This is faster and more stable.
-- **Page objects are injected as fixtures.** Tests request `loginPage` or `registerPage` directly instead of creating page objects themselves.
+- **Page objects and API clients are injected as fixtures.** Tests request `loginPage`, `registerPage` or `userApi` directly instead of creating these objects themselves.
+- **API clients mirror the Page Object Model.** `UserApi` knows the endpoints and request format; tests only decide what to verify. Client methods return the full response, so tests can check both status codes and response bodies.
 - **Page objects contain no assertions.** They describe how to interact with a page; tests decide what to verify.
 - **Locators follow Playwright's recommended priority**: role and accessible name first, text next, CSS only as a last resort.
 - **Unique test data.** Each registration test generates a new user with a unique email, so tests are independent and can run in parallel.
@@ -92,7 +105,9 @@ On every push and pull request to `main`, GitHub Actions:
 
 ## Roadmap
 
-- [ ] API tests
+- [x] API tests for users (registration, login, authorization)
+- [ ] API tests for products and basket
+- [ ] Use the API to prepare test data for UI tests
 - [ ] Authenticated state reuse (`storageState`)
 - [ ] Basket and checkout flows
 - [ ] Nightly scheduled CI run
