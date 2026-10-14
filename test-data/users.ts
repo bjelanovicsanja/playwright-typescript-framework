@@ -29,3 +29,8 @@ export function createNewUser(): NewUser {
         securityAnswer: 'Smith',
     };
 }
+
+export type LoggedInUser = NewUser & {
+    token: string;
+    bid: number;
+};

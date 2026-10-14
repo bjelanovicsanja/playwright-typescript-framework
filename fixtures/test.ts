@@ -2,17 +2,18 @@ import { test as base, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { UserApi } from '../api/UserApi';
-import { createNewUser, NewUser } from '../test-data/users';
+import { createNewUser, LoggedInUser } from '../test-data/users';
 import { BasketPage } from '../pages/BasketPage';
 import { ProductListPage } from '../pages/ProductListPage';
 
 type Fixtures = {
     loginPage: LoginPage;
     registerPage: RegisterPage;
-    userApi: UserApi;
-    loggedInUser: NewUser;
     basketPage: BasketPage;
     productListPage: ProductListPage;
+    userApi: UserApi;
+    apiUser: LoggedInUser;
+    loggedInUser: LoggedInUser;
 };
 
 export const test = base.extend<Fixtures>({
@@ -36,27 +37,33 @@ export const test = base.extend<Fixtures>({
         await use(new UserApi(request));
     },
 
-    loggedInUser: async ({ userApi, page, baseURL }, use) => {
-        const user = createNewUser();
-        await userApi.register(user.email, user.password);
-        const response = await userApi.login(user.email, user.password);
-        const { token, bid } = (await response.json()).authentication;
-
-        await page.context().addCookies([{ name: 'token', value: token, url: baseURL! }]);
-        await page.addInitScript(({ token, bid }) => {
-            localStorage.setItem('token', token);
-            sessionStorage.setItem('bid', String(bid));
-        }, { token, bid });
-
-        await use(user);
-    },
-
     basketPage: async ({ page }, use) => {
         await use(new BasketPage(page));
     },
 
     productListPage: async ({ page }, use) => {
         await use(new ProductListPage(page));
+    },
+
+    apiUser: async ({ userApi }, use) => {
+        const user = createNewUser();
+        await userApi.register(user.email, user.password);
+        const response = await userApi.login(user.email, user.password);
+        const { token, bid } = (await response.json()).authentication;
+
+        await use({ ...user, token, bid });
+    },
+
+    loggedInUser: async ({ apiUser, page, baseURL }, use) => {
+        await page.context().addCookies([{
+            name: 'token', value: apiUser.token, url: baseURL!
+        }]);
+        await page.addInitScript(({ token, bid }) => {
+            localStorage.setItem('token', token);
+            sessionStorage.setItem('bid', String(bid));
+        }, { token: apiUser.token, bid: apiUser.bid });
+
+        await use(apiUser);
     },
 
 });
