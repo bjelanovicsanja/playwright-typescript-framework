@@ -5,6 +5,7 @@ import { UserApi } from '../api/UserApi';
 import { createNewUser, LoggedInUser } from '../test-data/users';
 import { BasketPage } from '../pages/BasketPage';
 import { ProductListPage } from '../pages/ProductListPage';
+import { BasketApi } from '../api/BasketApi';
 
 type Fixtures = {
     loginPage: LoginPage;
@@ -14,6 +15,7 @@ type Fixtures = {
     userApi: UserApi;
     apiUser: LoggedInUser;
     loggedInUser: LoggedInUser;
+    basketApi: BasketApi;
 };
 
 export const test = base.extend<Fixtures>({
@@ -64,6 +66,10 @@ export const test = base.extend<Fixtures>({
         }, { token: apiUser.token, bid: apiUser.bid });
 
         await use(apiUser);
+    },
+
+    basketApi: async ({ request }, use) => {
+        await use(new BasketApi(request));
     },
 
 });

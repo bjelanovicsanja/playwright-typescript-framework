@@ -1,3 +1,7 @@
 export const products = {
-    appleJuice: 'Apple Juice (1000ml)',
+    appleJuice: {
+        id: 1,
+        name: 'Apple Juice (1000ml)',
+        price: 1.99,
+    },
 };

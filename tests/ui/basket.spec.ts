@@ -11,12 +11,12 @@ test.describe('Basket', () => {
 
     test('user can add a product to the basket', async ({ loggedInUser, productListPage, basketPage }) => {
         await productListPage.goto();
-        await productListPage.addToBasket(products.appleJuice);
-        await expect(productListPage.addedToBasketMessage(products.appleJuice)).toBeVisible();
+        await productListPage.addToBasket(products.appleJuice.name);
+        await expect(productListPage.addedToBasketMessage(products.appleJuice.name)).toBeVisible();
 
         await basketPage.goto();
 
-        await expect(basketPage.basketItem(products.appleJuice)).toBeVisible();
+        await expect(basketPage.basketItem(products.appleJuice.name)).toBeVisible();
     });
 
 });
