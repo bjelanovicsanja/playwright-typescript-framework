@@ -30,6 +30,7 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 | Area | Tests |
 |---|---|
 | Users | Create a user (201, no password in the response), new user can log in and receives a token, invalid login is rejected (401), user list is protected without authentication (401) |
+| Basket | Logged-in user can add a product to their basket (200), adding without authentication is rejected (401), adding more than the allowed quantity is rejected (400) |
 
 ## Project structure
 
@@ -97,18 +98,21 @@ On every push and pull request to `main`, GitHub Actions:
 ## Design decisions
 
 - **Popups are skipped with cookies, not clicks.** A custom fixture sets the `welcomebanner_status` and `cookieconsent_status` cookies before each test, so no test has to dismiss popups through the UI. This is faster and more stable.
-- **Page objects and API clients are injected as fixtures.** Tests request `loginPage`, `registerPage` or `userApi` directly instead of creating these objects themselves.
+- **Page objects and API clients are injected as fixtures.** Tests request `loginPage`, `basketPage`, `userApi` or `basketApi` directly instead of creating these objects themselves.
 - **API clients mirror the Page Object Model.** `UserApi` knows the endpoints and request format; tests only decide what to verify. Client methods return the full response, so tests can check both status codes and response bodies.
 - **Page objects contain no assertions.** They describe how to interact with a page; tests decide what to verify.
 - **Locators follow Playwright's recommended priority**: role and accessible name first, text next, CSS only as a last resort.
 - **Unique test data.** Each registration test generates a new user with a unique email, so tests are independent and can run in parallel.
-- **Login through the API for UI tests.** The `loggedInUser` fixture creates a user and logs in through the API, then injects the token into the browser. Tests that need a logged-in user start directly on the page they test, without going through the login form.
+- **Logged-in users are created through the API.** The `apiUser` fixture registers and logs in a fresh user through the API and returns it together with its auth token and basket ID, without opening a browser. API tests use it directly.
+- **Login through the API for UI tests.** The `loggedInUser` fixture builds on `apiUser` and injects its token into the browser. Tests that need a logged-in user start directly on the page they test, without going through the login form.
+- **Authenticated API calls.** API clients send the user's token in the `Authorization: Bearer` header, so tests can verify both authorized access and rejection of unauthenticated requests.
 - **No fixed waits.** The registration page waits for the security questions API response before interacting with the form, instead of using timeouts.
 
 ## Roadmap
 
 - [x] API tests for users (registration, login, authorization)
-- [ ] API tests for products and basket
+- [x] API tests for basket (authorization and quantity limits)
+- [ ] API tests for products
 - [x] Use the API to log in users for UI tests
 - [ ] Authenticated state reuse (`storageState`)
 - [ ] Basket and checkout flows
