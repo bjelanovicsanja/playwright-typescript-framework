@@ -4,6 +4,8 @@
 
 End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/www-project-juice-shop/), built with Playwright and TypeScript.
 
+📊 **[Latest test report](https://bjelanovicsanja.github.io/playwright-typescript-framework/)**, published by CI on every push to `main` and every night.
+
 > 🚧 Work in progress. The framework is being extended step by step (see [Roadmap](#roadmap)).
 
 ## Tech stack
@@ -88,12 +90,13 @@ BASE_URL=https://example.com npx playwright test
 
 ## CI
 
-On every push and pull request to `main`, GitHub Actions:
+On every push and pull request to `main`, every night (scheduled run) and on manual trigger, GitHub Actions:
 
 1. starts Juice Shop as a Docker service container,
 2. waits until the app is reachable,
 3. runs the test suite in Chromium (with retries on CI),
-4. uploads the HTML report with traces, screenshots and videos as a build artifact.
+4. uploads the HTML report with traces, screenshots and videos as a build artifact,
+5. publishes the report to [GitHub Pages](https://bjelanovicsanja.github.io/playwright-typescript-framework/) (not for pull requests).
 
 ## Design decisions
 
@@ -116,6 +119,6 @@ On every push and pull request to `main`, GitHub Actions:
 - [x] Use the API to log in users for UI tests
 - [ ] Authenticated state reuse (`storageState`)
 - [ ] Basket and checkout flows
-- [ ] Nightly scheduled CI run
-- [ ] HTML report published to GitHub Pages
+- [x] Nightly scheduled CI run
+- [x] HTML report published to GitHub Pages
 - [ ] Visual and accessibility checks
