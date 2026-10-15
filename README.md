@@ -15,6 +15,7 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 - **API testing** with Playwright's built-in `request` context
 - **GitHub Actions** CI
 - **Docker** (Juice Shop runs as a container, locally and in CI)
+- **Playwright Test Agents** with **Claude Code** for AI-assisted test planning and generation
 
 ## What is covered
 
@@ -26,6 +27,7 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 | Login | Valid credentials, invalid credentials |
 | Registration | Valid registration, new user can log in, passwords do not match |
 | Basket | Logged-in user sees their own basket, user can add a product to the basket, user can remove a product from the basket (basket prepared through the API) |
+| Product search | Exact name, partial term, case-insensitive search, match in product description, no results message (generated with Playwright Test Agents) |
 
 ### API
 
@@ -37,14 +39,18 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 ## Project structure
 
 ```
+├── .claude/agents/      # Playwright Test Agents (planner, generator, healer)
 ├── .github/workflows/   # CI pipeline
 ├── api/                 # API clients
 ├── fixtures/            # Custom fixtures (popup handling, page objects, API clients)
 ├── pages/               # Page objects
+├── specs/               # Test plans written by the planner agent
 ├── test-data/           # Static test data and test data generators
 ├── tests/
 │   ├── ui/              # UI tests
-│   └── api/             # API tests
+│   ├── api/             # API tests
+│   └── seed.spec.ts     # Starting point for the agents
+├── CLAUDE.md            # Framework rules the agents must follow
 ├── playwright.config.ts
 └── tsconfig.json
 ```
@@ -75,6 +81,22 @@ Tests only declare what they need, for example `async ({ loggedInUser, basketApi
 2. `loggedInUser` injects the user's token into the browser.
 3. The test adds a product to the basket through `basketApi` (setup through the API, no clicks).
 4. The test opens the basket page, checks that the product is there, removes it through the UI and checks that it is gone.
+
+## AI-assisted testing
+
+Product search tests were created with [Playwright Test Agents](https://playwright.dev/docs/test-agents), run through Claude Code. The agents do the exploring and writing; I review every step before anything is merged.
+
+```
+planner ──► specs/*.md ──► my review ──► generator ──► tests ──► my review ──► healer (if a test fails) ──► PR + CI
+```
+
+1. **Planner** explores the running app from `tests/seed.spec.ts` and writes a test plan in `specs/`.
+2. **Review of the plan.** I remove scenarios that cannot be verified, are duplicated or are not grounded in what the app really does. The product search plan went from 7 groups with many steps to 5 focused scenarios.
+3. **Generator** turns the plan into tests by performing each step in a live browser.
+4. **Review of the code.** The first generated version had 7 spec files with locators and helper functions inside the tests. To fix this at the source, I added `CLAUDE.md` with the framework rules (Page Object Model, fixtures, test data in `test-data/`, one spec file per feature). The regenerated tests follow the same structure as the rest of the framework.
+5. **Healer** is used when a test fails: it replays the test, finds what changed and proposes a fix for review.
+
+Changes go through a pull request, and CI must pass before merging.
 
 ## Getting started
 
@@ -145,6 +167,7 @@ On every push and pull request to `main`, every night (scheduled run) and on man
 - [ ] API tests for products
 - [x] Use the API to log in users for UI tests
 - [x] Basket flows (add and remove products)
+- [x] Product search, generated with Playwright Test Agents
 - [ ] Checkout flow
 - [x] Nightly scheduled CI run
 - [x] HTML report published to GitHub Pages
