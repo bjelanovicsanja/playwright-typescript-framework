@@ -49,6 +49,33 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 └── tsconfig.json
 ```
 
+## How it works
+
+All tests import `test` and `expect` from `fixtures/test.ts`, which extends Playwright's base test with custom fixtures:
+
+| Fixture | What it provides |
+|---|---|
+| `context` (overridden) | Sets the cookies that dismiss the welcome banner and cookie consent before any page loads |
+| `loginPage`, `registerPage`, `productListPage`, `basketPage` | Page objects |
+| `userApi`, `basketApi` | API clients built on Playwright's `request` context |
+| `apiUser` | A new user registered and logged in through the API, with its auth token and basket ID (no browser) |
+| `loggedInUser` | `apiUser` with its token injected into the browser, so the app opens already logged in |
+
+```
+userApi ──► apiUser ──► loggedInUser ──► UI tests that need a logged-in user
+                │
+                └──────────────────────► API tests that need a logged-in user
+```
+
+Tests only declare what they need, for example `async ({ loggedInUser, basketApi, basketPage })`, and Playwright builds the dependencies in the right order.
+
+**Example: removing a product from the basket**
+
+1. `apiUser` creates and logs in a fresh user through the API.
+2. `loggedInUser` injects the user's token into the browser.
+3. The test adds a product to the basket through `basketApi` (setup through the API, no clicks).
+4. The test opens the basket page, checks that the product is there, removes it through the UI and checks that it is gone.
+
 ## Getting started
 
 ### Prerequisites
@@ -117,8 +144,8 @@ On every push and pull request to `main`, every night (scheduled run) and on man
 - [x] API tests for basket (authorization and quantity limits)
 - [ ] API tests for products
 - [x] Use the API to log in users for UI tests
-- [ ] Authenticated state reuse (`storageState`)
-- [ ] Basket and checkout flows
+- [x] Basket flows (add and remove products)
+- [ ] Checkout flow
 - [x] Nightly scheduled CI run
 - [x] HTML report published to GitHub Pages
 - [ ] Visual and accessibility checks
