@@ -18,3 +18,9 @@ This is a Playwright + TypeScript framework for OWASP Juice Shop. Follow the exi
 
 ## Test data
 - Product names, prices and other static data go in `test-data/` (e.g. `test-data/products.ts`), not hardcoded in tests.
+
+## Test selection
+- Automate only what matters for regression: the main happy path, the most important invalid cases and a few logical edge cases.
+- Keep the plan small and focused; rare or exotic cases are left for manual and exploratory testing.
+- Every scenario must have a concrete, verifiable expected result.
+- The plan is reviewed by a human before tests are generated.
