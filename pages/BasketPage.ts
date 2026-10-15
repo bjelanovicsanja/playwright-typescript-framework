@@ -16,4 +16,8 @@ export class BasketPage {
         return this.page.getByRole('row').filter({ hasText: productName });
     }
 
+    async removeItem(productName: string) {
+        await this.basketItem(productName).locator('button:has(.fa-trash-alt)').click();
+    }
+
 }

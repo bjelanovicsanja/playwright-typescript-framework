@@ -19,4 +19,15 @@ test.describe('Basket', () => {
         await expect(basketPage.basketItem(products.appleJuice.name)).toBeVisible();
     });
 
+    test('user can remove a product from the basket', async ({ loggedInUser, basketApi, basketPage }) => {
+        await basketApi.addItem(loggedInUser.token, loggedInUser.bid, products.appleJuice.id);
+
+        await basketPage.goto();
+        await expect(basketPage.basketItem(products.appleJuice.name)).toBeVisible();
+
+        await basketPage.removeItem(products.appleJuice.name);
+
+        await expect(basketPage.basketItem(products.appleJuice.name)).toBeHidden();
+    });
+
 });

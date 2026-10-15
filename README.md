@@ -23,7 +23,7 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 | Home page | Page loads without onboarding popups |
 | Login | Valid credentials, invalid credentials |
 | Registration | Valid registration, new user can log in, passwords do not match |
-| Basket | Logged-in user sees their own basket, user can add a product to the basket |
+| Basket | Logged-in user sees their own basket, user can add a product to the basket, user can remove a product from the basket (basket prepared through the API) |
 
 ### API
 
