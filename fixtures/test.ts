@@ -6,6 +6,9 @@ import { createNewUser, LoggedInUser } from '../test-data/users';
 import { BasketPage } from '../pages/BasketPage';
 import { ProductListPage } from '../pages/ProductListPage';
 import { BasketApi } from '../api/BasketApi';
+import { CheckoutPage } from '../pages/CheckoutPage';
+import { AddressApi } from '../api/AddressApi';
+import { CardApi } from '../api/CardApi';
 
 type Fixtures = {
     loginPage: LoginPage;
@@ -16,6 +19,9 @@ type Fixtures = {
     apiUser: LoggedInUser;
     loggedInUser: LoggedInUser;
     basketApi: BasketApi;
+    checkoutPage: CheckoutPage;
+    addressApi: AddressApi;
+    cardApi: CardApi;
 };
 
 export const test = base.extend<Fixtures>({
@@ -70,6 +76,18 @@ export const test = base.extend<Fixtures>({
 
     basketApi: async ({ request }, use) => {
         await use(new BasketApi(request));
+    },
+
+    checkoutPage: async ({ page }, use) => {
+        await use(new CheckoutPage(page));
+    },
+
+    addressApi: async ({ request }, use) => {
+        await use(new AddressApi(request));
+    },
+
+    cardApi: async ({ request }, use) => {
+        await use(new CardApi(request));
     },
 
 });
