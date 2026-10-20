@@ -28,6 +28,7 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 | Registration | Valid registration, new user can log in, passwords do not match |
 | Basket | Logged-in user sees their own basket, user can add a product to the basket, user can remove a product from the basket (basket prepared through the API) |
 | Product search | Exact name, partial term, case-insensitive search, match in product description, no results message (generated with Playwright Test Agents) |
+| Checkout | User completes checkout and sees the order confirmation, order total equals items plus delivery price, user cannot continue without selecting an address, basket is empty after the order (address and card prepared through the API; generated with Playwright Test Agents) |
 
 ### API
 
@@ -62,8 +63,8 @@ All tests import `test` and `expect` from `fixtures/test.ts`, which extends Play
 | Fixture | What it provides |
 |---|---|
 | `context` (overridden) | Sets the cookies that dismiss the welcome banner and cookie consent before any page loads |
-| `loginPage`, `registerPage`, `productListPage`, `basketPage` | Page objects |
-| `userApi`, `basketApi` | API clients built on Playwright's `request` context |
+| `loginPage`, `registerPage`, `productListPage`, `basketPage`, `checkoutPage` | Page objects |
+| `userApi`, `basketApi`, `addressApi`, `cardApi` | API clients built on Playwright's `request` context |
 | `apiUser` | A new user registered and logged in through the API, with its auth token and basket ID (no browser) |
 | `loggedInUser` | `apiUser` with its token injected into the browser, so the app opens already logged in |
 
@@ -84,7 +85,7 @@ Tests only declare what they need, for example `async ({ loggedInUser, basketApi
 
 ## AI-assisted testing
 
-Product search tests were created with [Playwright Test Agents](https://playwright.dev/docs/test-agents), run through Claude Code. The agents do the exploring and writing; I review every step before anything is merged.
+Product search and checkout tests were created with [Playwright Test Agents](https://playwright.dev/docs/test-agents), run through Claude Code. The agents do the exploring and writing; I review every step before anything is merged.
 
 ```
 planner ──► specs/*.md ──► my review ──► generator ──► tests ──► my review ──► healer (if a test fails) ──► PR + CI
@@ -95,6 +96,8 @@ planner ──► specs/*.md ──► my review ──► generator ──► t
 3. **Generator** turns the plan into tests by performing each step in a live browser.
 4. **Review of the code.** The first generated version had 7 spec files with locators and helper functions inside the tests. To fix this at the source, I added `CLAUDE.md` with the framework rules (Page Object Model, fixtures, test data in `test-data/`, one spec file per feature). The regenerated tests follow the same structure as the rest of the framework.
 5. **Healer** is used when a test fails: it replays the test, finds what changed and proposes a fix for review.
+
+For the checkout tests, with `CLAUDE.md` already in place, the generated code followed the framework structure on the first run; the only follow-up was moving a repeated multi-step flow into a page object method.
 
 Changes go through a pull request, and CI must pass before merging.
 
@@ -158,6 +161,7 @@ On every push and pull request to `main`, every night (scheduled run) and on man
 - **Logged-in users are created through the API.** The `apiUser` fixture registers and logs in a fresh user through the API and returns it together with its auth token and basket ID, without opening a browser. API tests use it directly.
 - **Login through the API for UI tests.** The `loggedInUser` fixture builds on `apiUser` and injects its token into the browser. Tests that need a logged-in user start directly on the page they test, without going through the login form.
 - **Authenticated API calls.** API clients send the user's token in the `Authorization: Bearer` header, so tests can verify both authorized access and rejection of unauthenticated requests.
+- **Repeated flows live in page objects.** Page objects expose small methods for single steps; a flow repeated only to reach the point under test (e.g. `goToOrderSummary()`) is wrapped in one page object method, while the happy-path test keeps every step visible.
 - **No fixed waits.** The registration page waits for the security questions API response before interacting with the form, instead of using timeouts.
 
 ## Roadmap
@@ -168,7 +172,7 @@ On every push and pull request to `main`, every night (scheduled run) and on man
 - [x] Use the API to log in users for UI tests
 - [x] Basket flows (add and remove products)
 - [x] Product search, generated with Playwright Test Agents
-- [ ] Checkout flow
+- [x] Checkout flow
 - [x] Nightly scheduled CI run
 - [x] HTML report published to GitHub Pages
 - [ ] Visual and accessibility checks
