@@ -6,8 +6,6 @@ End-to-end test automation framework for [OWASP Juice Shop](https://owasp.org/ww
 
 📊 **[Latest test report](https://bjelanovicsanja.github.io/playwright-typescript-framework/)**, published by CI on every push to `main` and every night.
 
-> 🚧 Work in progress. The framework is being extended step by step (see [Roadmap](#roadmap)).
-
 ## Tech stack
 
 - **Playwright Test** with **TypeScript**
@@ -164,15 +162,7 @@ On every push and pull request to `main`, every night (scheduled run) and on man
 - **Repeated flows live in page objects.** Page objects expose small methods for single steps; a flow repeated only to reach the point under test (e.g. `goToOrderSummary()`) is wrapped in one page object method, while the happy-path test keeps every step visible.
 - **No fixed waits.** The registration page waits for the security questions API response before interacting with the form, instead of using timeouts.
 
-## Roadmap
+## Possible next steps
 
-- [x] API tests for users (registration, login, authorization)
-- [x] API tests for basket (authorization and quantity limits)
-- [ ] API tests for products
-- [x] Use the API to log in users for UI tests
-- [x] Basket flows (add and remove products)
-- [x] Product search, generated with Playwright Test Agents
-- [x] Checkout flow
-- [x] Nightly scheduled CI run
-- [x] HTML report published to GitHub Pages
-- [ ] Visual and accessibility checks
+- API tests for products
+- Visual and accessibility checks
